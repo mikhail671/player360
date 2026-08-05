@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>Timeline A — Phase bar</title>
+<style>
+:root{--bg:#f6f7f9;--surface:#fff;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--faint:#9ca3af;
+--vip:#10b981;--segA:#3b82f6;--segB:#f59e0b;--segC:#ef4444;--pos:#10b981;--neu:#f59e0b;--neg:#ef4444;}
+*{box-sizing:border-box}
+body{margin:0;padding:32px;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;color:var(--text);font-size:13px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,.03);max-width:1200px;margin:0 auto}
+.card-h{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+h3{margin:0 0 4px;font-size:15px;font-weight:600}
+.sub{color:var(--muted);font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend .sw{width:10px;height:10px;border-radius:2px}
+.summary{display:flex;gap:20px;padding:12px 14px;background:#f9fafb;border-radius:8px;margin-bottom:20px;font-size:12px}
+.summary div{display:flex;flex-direction:column;gap:2px}
+.summary .lbl{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.summary .val{font-weight:600;font-size:13px}
+.summary .val.risk{color:var(--segC)}
+
+.phasebar-wrap{position:relative;padding:32px 0 60px}
+.phasebar{display:flex;height:44px;border-radius:6px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}
+.phase{position:relative;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:12px;padding:0 10px;cursor:pointer;transition:filter .15s}
+.phase:hover{filter:brightness(1.1)}
+.phase small{opacity:.75;font-size:10.5px;font-weight:500;margin-left:6px}
+.phase.vip{background:var(--vip)}
+.phase.segA{background:var(--segA)}
+.phase.segC{background:var(--segC)}
+
+.dateline{position:absolute;left:0;right:0;top:0;height:24px;display:flex}
+.dateline .tick{position:relative;flex-shrink:0}
+.dateline .tick::before{content:"";position:absolute;left:0;bottom:-4px;width:1px;height:6px;background:var(--faint)}
+.dateline .tick span{position:absolute;left:0;top:0;transform:translateX(-50%);font-size:10.5px;color:var(--muted);white-space:nowrap;font-weight:500}
+
+.events{position:absolute;left:0;right:0;bottom:0;height:52px}
+.evt{position:absolute;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px}
+.evt .dot{width:11px;height:11px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px currentColor,0 1px 3px rgba(0,0,0,.15)}
+.evt .dot::before{content:"";position:absolute;top:-16px;left:50%;width:1px;height:14px;background:currentColor;opacity:.35}
+.evt.pos{color:var(--pos)}
+.evt.pos .dot{background:var(--pos)}
+.evt.neu{color:var(--neu)}
+.evt.neu .dot{background:var(--neu)}
+.evt.neg{color:var(--neg)}
+.evt.neg .dot{background:var(--neg)}
+.evt .lbl{font-size:10.5px;color:var(--text);white-space:nowrap;font-weight:500;background:#fff;padding:1px 5px;border-radius:3px;border:1px solid var(--border)}
+</style></head>
+<body>
+<div class="card">
+  <div class="card-h">
+    <div><h3>Смена статусных групп и триггеры</h3><div class="sub">3 фазы за 11 месяцев · тренд ухудшается</div></div>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--vip)"></span>VIP-CEMENT</span>
+      <span><span class="sw" style="background:var(--segA)"></span>Segment A</span>
+      <span><span class="sw" style="background:var(--segC)"></span>Segment C</span>
+      <span><span class="sw" style="background:var(--pos);border-radius:50%"></span>Позитивный</span>
+      <span><span class="sw" style="background:var(--neu);border-radius:50%"></span>Нейтральный</span>
+      <span><span class="sw" style="background:var(--neg);border-radius:50%"></span>Негативный</span>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div><span class="lbl">Текущий сегмент</span><span class="val risk">Segment C</span></div>
+    <div><span class="lbl">В сегменте</span><span class="val">89 дней</span></div>
+    <div><span class="lbl">Всего переходов</span><span class="val">2</span></div>
+    <div><span class="lbl">Направление</span><span class="val risk">Даунгрейд ↓</span></div>
+    <div><span class="lbl">Триггеров 90д</span><span class="val">6 (2 негативных)</span></div>
+  </div>
+
+  <div class="phasebar-wrap">
+    <div class="dateline">
+      <div class="tick" style="left:0%"><span>мар 2025</span></div>
+      <div class="tick" style="left:45%"><span>авг 2025</span></div>
+      <div class="tick" style="left:72%"><span>ноя 2025</span></div>
+      <div class="tick" style="left:100%"><span>фев 2026</span></div>
+    </div>
+    <div class="phasebar">
+      <div class="phase vip" style="flex:0 0 45%">VIP-CEMENT<small>150 дн</small></div>
+      <div class="phase segA" style="flex:0 0 27%">Segment A<small>88 дн</small></div>
+      <div class="phase segC" style="flex:0 0 28%">Segment C<small>89 дн</small></div>
+    </div>
+    <div class="events">
+      <div class="evt pos" style="left:12%"><span class="dot"></span><span class="lbl">Deposit spike</span></div>
+      <div class="evt neg" style="left:24%"><span class="dot"></span><span class="lbl">Bonus reject</span></div>
+      <div class="evt neu" style="left:38%"><span class="dot"></span><span class="lbl">Session drop</span></div>
+      <div class="evt neu" style="left:55%"><span class="dot"></span><span class="lbl">GGR −40%</span></div>
+      <div class="evt neg" style="left:74%"><span class="dot"></span><span class="lbl">Churn signal</span></div>
+      <div class="evt neu" style="left:90%"><span class="dot"></span><span class="lbl">Support ticket</span></div>
+    </div>
+  </div>
+</div>
+</body></html>

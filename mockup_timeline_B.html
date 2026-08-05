@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>Timeline B — Vertical phases</title>
+<style>
+:root{--bg:#f6f7f9;--surface:#fff;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--faint:#9ca3af;
+--vip:#10b981;--segA:#3b82f6;--segC:#ef4444;--pos:#10b981;--neu:#f59e0b;--neg:#ef4444;}
+*{box-sizing:border-box}
+body{margin:0;padding:32px;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;color:var(--text);font-size:13px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,.03);max-width:1200px;margin:0 auto}
+.card-h{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+h3{margin:0 0 4px;font-size:15px;font-weight:600}
+.sub{color:var(--muted);font-size:12px}
+
+.phases{position:relative;padding-left:28px}
+.phases::before{content:"";position:absolute;left:8px;top:14px;bottom:14px;width:2px;background:var(--border)}
+.phase{position:relative;padding:12px 14px;background:#f9fafb;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;border-left:4px solid}
+.phase.vip{border-left-color:var(--vip)}
+.phase.segA{border-left-color:var(--segA)}
+.phase.segC{border-left-color:var(--segC)}
+.phase.current{background:#fff5f5;border-color:#fecaca}
+.phase::before{content:"";position:absolute;left:-25px;top:16px;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid}
+.phase.vip::before{border-color:var(--vip)}
+.phase.segA::before{border-color:var(--segA)}
+.phase.segC::before{border-color:var(--segC)}
+
+.phase-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;gap:10px;flex-wrap:wrap}
+.phase-name{font-weight:600;font-size:13.5px}
+.phase-name.vip{color:var(--vip)}
+.phase-name.segA{color:var(--segA)}
+.phase-name.segC{color:var(--segC)}
+.phase-period{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.phase-dur{font-size:11px;color:var(--faint);margin-left:6px}
+.phase-badge{background:var(--segC);color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.05em}
+
+.triggers{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.trig{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:4px;font-size:11.5px;background:#fff;border:1px solid var(--border)}
+.trig::before{content:"";width:6px;height:6px;border-radius:50%}
+.trig.pos::before{background:var(--pos)}
+.trig.neu::before{background:var(--neu)}
+.trig.neg::before{background:var(--neg)}
+.trig .d{color:var(--muted);font-size:10.5px;margin-left:4px}
+
+.transition{font-size:11px;color:var(--muted);padding:4px 0 8px;padding-left:0;margin-left:-14px}
+.transition strong{color:var(--text)}
+</style></head>
+<body>
+<div class="card">
+  <div class="card-h">
+    <div><h3>Смена статусных групп и триггеры</h3><div class="sub">3 фазы за 11 месяцев · последняя смена — 08.11.2025</div></div>
+  </div>
+
+  <div class="phases">
+    <div class="phase segC current">
+      <div class="phase-h">
+        <div><span class="phase-name segC">Segment C</span><span class="phase-badge">Текущая</span></div>
+        <div class="phase-period">08 ноя 2025 — сейчас<span class="phase-dur">· 89 дней</span></div>
+      </div>
+      <div class="sub" style="margin-bottom:6px">Причина перехода: <strong style="color:var(--text)">6 сессий подряд без депозита + жалоба в саппорт</strong></div>
+      <div class="triggers">
+        <span class="trig neg">Churn signal<span class="d">12 ноя</span></span>
+        <span class="trig neu">Support ticket<span class="d">21 дек</span></span>
+        <span class="trig neu">Bonus декейн<span class="d">15 янв</span></span>
+      </div>
+    </div>
+
+    <div class="phase segA">
+      <div class="phase-h">
+        <div><span class="phase-name segA">Segment A</span></div>
+        <div class="phase-period">12 авг — 08 ноя 2025<span class="phase-dur">· 88 дней</span></div>
+      </div>
+      <div class="sub" style="margin-bottom:6px">Причина перехода: <strong style="color:var(--text)">GGR упал на 40% за 30 дней</strong></div>
+      <div class="triggers">
+        <span class="trig neu">Session drop<span class="d">28 авг</span></span>
+        <span class="trig neu">GGR −40%<span class="d">05 окт</span></span>
+      </div>
+    </div>
+
+    <div class="phase vip">
+      <div class="phase-h">
+        <div><span class="phase-name vip">VIP-CEMENT</span></div>
+        <div class="phase-period">15 мар — 12 авг 2025<span class="phase-dur">· 150 дней</span></div>
+      </div>
+      <div class="sub" style="margin-bottom:6px">Стартовый сегмент</div>
+      <div class="triggers">
+        <span class="trig pos">Deposit spike<span class="d">22 мар</span></span>
+        <span class="trig neg">Bonus reject<span class="d">18 апр</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

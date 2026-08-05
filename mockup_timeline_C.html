@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>Timeline C — Hybrid</title>
+<style>
+:root{--bg:#f6f7f9;--surface:#fff;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--faint:#9ca3af;
+--vip:#10b981;--segA:#3b82f6;--segC:#ef4444;--pos:#10b981;--neu:#f59e0b;--neg:#ef4444;}
+*{box-sizing:border-box}
+body{margin:0;padding:32px;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;color:var(--text);font-size:13px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,.03);max-width:1200px;margin:0 auto}
+.card-h{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+h3{margin:0 0 4px;font-size:15px;font-weight:600}
+.sub{color:var(--muted);font-size:12px}
+
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.summary .cell{padding:10px 12px;background:#f9fafb;border-radius:8px;border-left:3px solid transparent}
+.summary .cell.risk{border-left-color:var(--segC)}
+.summary .lbl{color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.summary .val{font-weight:700;font-size:15px}
+.summary .val.risk{color:var(--segC)}
+.summary .delta{font-size:11px;color:var(--muted);margin-left:5px;font-weight:500}
+
+.phasebar-wrap{position:relative;padding:28px 0 20px}
+.phasebar{display:flex;height:36px;border-radius:6px;overflow:hidden}
+.phase{position:relative;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:12px;padding:0 10px;cursor:pointer;transition:filter .15s}
+.phase:hover{filter:brightness(1.1)}
+.phase small{opacity:.8;font-size:10.5px;font-weight:500;margin-left:6px}
+.phase.vip{background:var(--vip)}
+.phase.segA{background:var(--segA)}
+.phase.segC{background:var(--segC)}
+.phase.active{box-shadow:inset 0 0 0 2px #fff,0 0 0 2px currentColor}
+
+.dateline{position:absolute;left:0;right:0;top:0;height:20px;display:flex}
+.dateline .tick{position:relative}
+.dateline .tick::before{content:"";position:absolute;left:0;bottom:-4px;width:1px;height:6px;background:var(--faint)}
+.dateline .tick span{position:absolute;left:0;top:0;transform:translateX(-50%);font-size:10.5px;color:var(--muted);white-space:nowrap;font-weight:500}
+
+.trigrow{display:flex;gap:6px;margin-top:14px;padding:10px;background:#f9fafb;border-radius:8px;overflow-x:auto}
+.trig{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:#fff;border:1px solid var(--border);border-radius:6px;font-size:11.5px;cursor:pointer}
+.trig .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.trig.pos .dot{background:var(--pos)}
+.trig.neu .dot{background:var(--neu)}
+.trig.neg .dot{background:var(--neg)}
+.trig .d{color:var(--muted);font-size:10.5px}
+.trig-h{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.trig-h a{font-size:11px;color:#3b82f6;text-decoration:none;text-transform:none;letter-spacing:0}
+
+.detail{margin-top:16px;padding:14px;background:#fff5f5;border:1px solid #fecaca;border-radius:8px;border-left:4px solid var(--segC)}
+.detail-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.detail-h strong{font-size:13.5px;color:var(--segC)}
+.detail-h .p{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.reason{font-size:12px;color:var(--text);margin-bottom:6px}
+.reason b{background:#fef3c7;padding:1px 4px;border-radius:3px}
+
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:10.5px;color:var(--muted);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend .sw{width:8px;height:8px;border-radius:50%}
+</style></head>
+<body>
+<div class="card">
+  <div class="card-h">
+    <div><h3>Смена статусных групп и триггеры</h3><div class="sub">Тренд ухудшается · 3 фазы за 11 месяцев</div></div>
+  </div>
+
+  <div class="summary">
+    <div class="cell risk">
+      <div class="lbl">Текущий сегмент</div>
+      <div class="val risk">Segment C <span class="delta">89 дней</span></div>
+    </div>
+    <div class="cell">
+      <div class="lbl">Стартовый</div>
+      <div class="val">VIP-CEMENT</div>
+    </div>
+    <div class="cell">
+      <div class="lbl">Переходов</div>
+      <div class="val">2 <span class="delta">оба даунгрейд</span></div>
+    </div>
+    <div class="cell">
+      <div class="lbl">Негативных триггеров 90д</div>
+      <div class="val" style="color:var(--neg)">2</div>
+    </div>
+  </div>
+
+  <div class="phasebar-wrap">
+    <div class="dateline">
+      <div class="tick" style="left:0%"><span>мар 2025</span></div>
+      <div class="tick" style="left:45%"><span>авг 2025</span></div>
+      <div class="tick" style="left:72%"><span>ноя 2025</span></div>
+      <div class="tick" style="left:100%"><span>фев 2026</span></div>
+    </div>
+    <div class="phasebar">
+      <div class="phase vip" style="flex:0 0 45%">VIP-CEMENT<small>150 дн</small></div>
+      <div class="phase segA" style="flex:0 0 27%">Segment A<small>88 дн</small></div>
+      <div class="phase segC active" style="flex:0 0 28%">Segment C<small>89 дн</small></div>
+    </div>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--pos)"></span>Позитивный</span>
+      <span><span class="sw" style="background:var(--neu)"></span>Нейтральный</span>
+      <span><span class="sw" style="background:var(--neg)"></span>Негативный</span>
+    </div>
+  </div>
+
+  <div>
+    <div class="trig-h"><span>Триггеры текущей фазы · Segment C</span><a href="#">Показать все 6 →</a></div>
+    <div class="trigrow">
+      <div class="trig neg"><span class="dot"></span>Churn signal<span class="d">12 ноя</span></div>
+      <div class="trig neu"><span class="dot"></span>Support ticket<span class="d">21 дек</span></div>
+      <div class="trig neu"><span class="dot"></span>Bonus декейн<span class="d">15 янв</span></div>
+      <div class="trig neg"><span class="dot"></span>Deposit gap 21д<span class="d">02 фев</span></div>
+    </div>
+  </div>
+
+  <div class="detail">
+    <div class="detail-h"><strong>Последний переход: VIP-CEMENT → Segment C</strong><span class="p">08 ноя 2025 · 89 дней назад</span></div>
+    <div class="reason">Причина: <b>GGR упал на 40%</b> · <b>6 сессий подряд без депозита</b> · <b>жалоба в саппорт</b></div>
+    <div class="sub">Действие движка: Cashback €420 (8%) + звонок ведущего менеджера · <a href="#" style="color:#3b82f6">Открыть Next Best Action</a></div>
+  </div>
+</div>
+</body></html>
