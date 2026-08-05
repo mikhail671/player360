@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>player-intelligence-dashboard-full</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+  --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec; --color-border:#d4d1ca;
+  --color-text:#28251d; --color-text-muted:#7a7974; --color-text-faint:#a7a39c; --color-primary:#01696f; --color-primary-highlight:#cedcd8;
+  --color-success:#437a22; --color-warning:#964219; --color-error:#a12c7b; --color-gold:#d19900;
+  --space-1:.25rem; --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-10:2.5rem; --space-12:3rem;
+  --radius-sm:.375rem; --radius-md:.5rem; --radius-lg:.75rem; --radius-xl:1rem;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.05); --shadow-md:0 6px 18px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:Inter,system-ui,-apple-system,sans-serif;background:var(--color-bg);color:var(--color-text);line-height:1.5}
+img,svg,canvas{display:block;max-width:100%} button{font:inherit}
+.main-wrap{max-width:1440px;margin:0 auto;padding:var(--space-6)}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:var(--space-6);}
+.page{display:flex;flex-direction:column;gap:var(--space-6);}
+.page-block{display:flex;flex-direction:column;gap:var(--space-6);}
+.toc{position:sticky;top:var(--space-6);align-self:flex-start;padding:var(--space-4);border-radius:var(--radius-xl);background:var(--color-surface);box-shadow:var(--shadow-sm);}
+.toc-title{font-size:.86rem;text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted);margin-bottom:var(--space-3);}
+.toc-nav{display:flex;flex-direction:column;gap:.45rem;}
+.toc-nav a{font-size:.9rem;color:var(--color-text-muted);text-decoration:none;}
+.toc-nav a:hover{color:var(--color-primary);}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:var(--space-6);}
+.page{display:flex;flex-direction:column;gap:var(--space-6);}
+.page-block{display:flex;flex-direction:column;gap:var(--space-6);}
+.toc{position:sticky;top:var(--space-6);align-self:flex-start;padding:var(--space-4);border-radius:var(--radius-xl);background:var(--color-surface);box-shadow:var(--shadow-sm);}
+.toc-title{font-size:.86rem;text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted);margin-bottom:var(--space-3);}
+.toc-nav{display:flex;flex-direction:column;gap:.45rem;}
+.toc-nav a{font-size:.9rem;color:var(--color-text-muted);text-decoration:none;}
+.toc-nav a:hover{color:var(--color-primary);}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-6);margin-bottom:var(--space-6)}
+.title-wrap h1{margin:0;font-size:2rem}.title-wrap p{margin:.4rem 0 0;color:var(--color-text-muted);max-width:70ch}
+.top-actions{display:flex;gap:var(--space-3);flex-wrap:wrap}
+.btn,.btn-ghost{border-radius:999px;padding:.72rem 1rem;border:1px solid var(--color-border);cursor:pointer}
+.btn{background:var(--color-primary);border-color:var(--color-primary);color:#fff}.btn-ghost{background:transparent;color:var(--color-text)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,2.05fr) minmax(340px,1fr);gap:var(--space-6);margin-bottom:var(--space-6)}
+.card{background:var(--color-surface);border:1px solid rgba(40,37,29,.08);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm)}
+.hero-card{padding:var(--space-4)}
+.hero-head{display:flex;justify-content:space-between;gap:var(--space-4);align-items:flex-start;margin-bottom:var(--space-5)}
+.player-id{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}.tag{display:inline-flex;align-items:center;gap:.4rem;padding:.28rem .6rem;border-radius:999px;background:var(--color-surface-offset);font-size:.76rem;color:var(--color-text-muted);border:1px solid rgba(40,37,29,.08)}
+.status-live{background:rgba(67,122,34,.12);color:var(--color-success);font-weight:700}.status-risk{background:rgba(161,44,123,.08);color:var(--color-error);font-weight:700}
+.score-cluster{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-4);margin-bottom:var(--space-5)}
+.score-box{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-offset)}
+.score-box .label{font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;color:var(--color-text-muted);font-weight:700}.score-box strong{display:block;margin-top:.45rem;font-size:1.65rem;line-height:1;font-weight:900}.score-box em{display:block;margin-top:.35rem;color:var(--color-text-muted);font-style:normal;font-size:.82rem}
+.pref-switcher{display:inline-flex;gap:.35rem;margin-top:.55rem;flex-wrap:wrap}.pref-segment{display:inline-flex;flex-direction:column;gap:.14rem;padding:.4rem .72rem;border-radius:999px;border:1px solid rgba(40,37,29,.12);background:var(--color-surface-2);min-width:102px}.pref-segment span{font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700}.pref-segment strong{margin:0;font-size:.96rem}.pref-segment.active{background:var(--color-primary-highlight);border-color:rgba(1,105,111,.35);color:var(--color-primary)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-4)}
+.kpi{padding:var(--space-3);border-radius:var(--radius-lg);background:var(--color-surface-2)}.kpi label{display:block;font-size:.76rem;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em}.kpi strong{display:block;margin-top:.32rem;font-size:1.2rem}.kpi small{display:block;margin-top:.22rem;color:var(--color-text-muted)}
+.recommendation-panel{padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-3)}.section-label{font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted);font-weight:700}.recommendation-title{font-size:1.2rem;font-weight:800}.recommendation-copy{color:var(--color-text-muted);margin:0}.promo-stack{display:flex;flex-direction:column;gap:var(--space-3)}
+.promo{padding:var(--space-3);border-radius:var(--radius-lg);background:var(--color-surface-offset)}.promo strong{display:block;margin-bottom:.18rem}.promo span{font-size:.86rem;color:var(--color-text-muted)}
+.mini-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-4)}.mini-metric{padding:var(--space-3);border-radius:var(--radius-lg);background:var(--color-surface-2)}.mini-metric b{font-size:1.25rem}.mini-metric span{display:block;color:var(--color-text-muted);font-size:.82rem;margin-top:.2rem}
+.decision-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-4);margin-bottom:var(--space-6)}
+.decision-card{padding:var(--space-4)}.decision-top{display:flex;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-4)}.decision-title-wrap h3{margin:0;font-size:1.06rem}.decision-title-wrap p{margin:.28rem 0 0;color:var(--color-text-muted);font-size:.86rem}.decision-score strong{display:block;font-size:1.7rem;line-height:1}.decision-score span{display:block;margin-top:.22rem;font-size:.8rem;color:var(--color-text-muted)}
+.trendline,.budget-track,.bar{height:8px;border-radius:999px;background:rgba(40,37,29,.1);overflow:hidden}.trendline span,.budget-track span,.bar span{display:block;height:100%;background:var(--color-primary);border-radius:999px}
+.meta-row{display:flex;flex-wrap:wrap;gap:var(--space-3);margin-top:var(--space-4)}.meta-chip{padding:.45rem .7rem;border-radius:999px;background:var(--color-surface-offset);font-size:.78rem}.meta-chip label{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-muted);margin-right:.3rem}.meta-chip strong{font-weight:700}
+.reason-list,.guardrail-list,.action-list,.ranking-list,.timeline{display:flex;flex-direction:column;gap:.55rem;margin-top:var(--space-4)}
+.reason-item,.guardrail-item,.action-item,.ranking-row,.timeline-item{display:flex;justify-content:space-between;gap:var(--space-3);align-items:flex-start;padding:var(--space-2);border-radius:var(--radius-lg);background:var(--color-surface-2)}
+.reason-item strong,.guardrail-item strong,.action-item strong,.timeline-item strong{display:block}.reason-item small,.guardrail-item small,.action-item small,.timeline-item p{color:var(--color-text-muted);font-size:.82rem;margin:.15rem 0 0}.reason-weight{white-space:nowrap;font-size:.78rem;color:var(--color-text-muted);font-weight:700}
+.state-good,.state-mid,.state-risk{display:inline-flex;align-items:center;padding:.18rem .55rem;border-radius:999px;font-size:.72rem;font-weight:700;white-space:nowrap}.state-good{background:rgba(67,122,34,.12);color:var(--color-success)}.state-mid{background:rgba(209,153,0,.12);color:#8a5b00}.state-risk{background:rgba(161,44,123,.08);color:var(--color-error)}
+.decision-footer{display:flex;gap:var(--space-3);justify-content:flex-end;margin-top:var(--space-4)}
+.action-btn,.ghost-btn{padding:.62rem .95rem;border-radius:999px;border:1px solid var(--color-border);cursor:pointer}.action-btn{background:var(--color-primary);border-color:var(--color-primary);color:#fff}.ghost-btn{background:transparent}
+.mini-table{display:flex;flex-direction:column;gap:.5rem;margin-top:var(--space-4)}.mini-table-row{display:grid;grid-template-columns:minmax(0,1.8fr) repeat(3,minmax(0,.9fr)) auto;gap:var(--space-2);align-items:center;padding:var(--space-2);background:var(--color-surface-2);border-radius:var(--radius-lg);font-size:.82rem}.inline-action{background:transparent;border:none;color:var(--color-primary);font-weight:700;cursor:pointer;font-size:.78rem;line-height:1.1;white-space:normal;text-align:left;padding:.2rem 0}.games-table .inline-action,.sports-panel .inline-action{display:inline-block;max-width:92px;}
+.grid-two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:var(--space-6);margin-bottom:var(--space-6)}
+.behavior-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,0.9fr);gap:var(--space-6);}
+@media (max-width:1024px){.behavior-grid{grid-template-columns:minmax(0,1fr);}}.stack{display:flex;flex-direction:column;gap:var(--space-4)}.panel-head{display:flex;justify-content:space-between;gap:var(--space-3);margin-bottom:var(--space-3);padding:var(--space-4) var(--space-4) 0}.panel-head h2{margin:0;font-size:1.14rem}.panel-head p{margin:.28rem 0 0;color:var(--color-text-muted);font-size:.88rem}.panel-body{padding:0 var(--space-4) var(--space-4)}
+.channel-grid{display:flex;flex-direction:column;gap:var(--space-3)}.channel-row{display:grid;grid-template-columns:1.4fr 1fr 1fr auto;gap:var(--space-3);align-items:center;padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-offset);font-size:.84rem}.channel-name{display:flex;flex-direction:column;align-items:flex-start;gap:.18rem;min-width:0}.channel-title{font-weight:700;white-space:nowrap}.channel-meta{display:block;color:var(--color-text-muted);font-size:.82rem;line-height:1.45;max-width:210px;min-width:0;white-space:normal;overflow-wrap:break-word;word-break:normal}.status-corner{display:inline-flex;align-items:center;padding:.12rem .42rem;border-radius:999px;font-size:.65rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;background:var(--color-primary-highlight);color:var(--color-primary);border:1px solid rgba(1,105,111,.18);line-height:1.1}
+.signal-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-3)}.signal-card{padding:var(--space-3);border-radius:var(--radius-lg);background:var(--color-surface-offset)}.signal-card span{display:block;font-size:.75rem;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em}.signal-card strong{display:block;margin-top:.3rem;font-size:1.25rem}.signal-card p{margin:.2rem 0 0;color:var(--color-text-muted);font-size:.82rem}
+.games-table,.signals-table{width:100%;border-collapse:collapse;table-layout:fixed}.games-table th,.games-table td,.signals-table th,.signals-table td{text-align:left;padding:.8rem .6rem;border-bottom:1px solid rgba(40,37,29,.08);vertical-align:top;font-size:.86rem}.games-table th,.signals-table th{font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-muted)}.games-table col.col-game{width:30%}.games-table col.col-share{width:18%}.games-table col.col-bet{width:20%}.games-table col.col-fit{width:14%}.games-table col.col-action{width:18%}.fav-game strong{display:block;white-space:normal;overflow-wrap:normal;word-break:normal}.fav-game span{display:block;color:var(--color-text-muted);font-size:.78rem;margin-top:.15rem}
+.chart-wrap{height:320px}.timeline-item{align-items:center}.timeline-item time{white-space:nowrap;font-size:.78rem;color:var(--color-text-muted)}.dot{width:10px;height:10px;border-radius:50%;background:var(--color-primary);margin-top:.15rem;flex:none}
+.footer-note{color:var(--color-text-muted);font-size:.82rem;text-align:right}
+
+/* ===== Fix for dense decision cards ===== */
+.decision-card{
+  padding: var(--space-4);
+  padding-bottom: var(--space-5);
+  min-width: 0;
+}
+.decision-top{align-items:flex-start;}
+.decision-title-wrap,.decision-score{min-width:0;}
+.decision-title-wrap h3,.decision-title-wrap p,
+.reason-item strong,.reason-item small,
+.action-item strong,.action-item small,
+.guardrail-item strong,.guardrail-item small,
+.ranking-row strong,.ranking-row small{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.mini-table{display:flex;flex-direction:column;gap:.6rem;margin-top:var(--space-4);}
+.mini-table-row{
+  display:grid;
+  grid-template-columns:minmax(0,1.6fr) repeat(2,minmax(72px,.8fr)) auto auto;
+  gap:.45rem;
+  align-items:center;
+  padding:.65rem .7rem;
+  background:var(--color-surface-2);
+  border-radius:var(--radius-lg);
+  font-size:.8rem;
+  line-height:1.2;
+  min-width:0;
+}
+.mini-table-row .metric{
+  text-align:right;
+}
+
+.mini-table-row>*{min-width:0;}
+.mini-table-row strong,.mini-table-row span{overflow-wrap:anywhere;word-break:break-word;}
+.state-good,.state-mid,.state-risk{justify-self:start;line-height:1.1;}
+.inline-action{
+  background:transparent;border:0;color:var(--color-primary);
+  font-weight:700;cursor:pointer;font-size:.78rem;line-height:1.1;
+  white-space:normal;justify-self:end;padding:.2rem 0;text-align:left;
+}
+.games-table .inline-action{display:inline-block;max-width:92px;}
+.meta-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:var(--space-4);}
+.decision-footer{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:flex-end;margin-top:var(--space-4);}
+.action-btn,.ghost-btn{
+  padding:.62rem .9rem;border-radius:999px;border:1px solid var(--color-border);
+  cursor:pointer;font-size:.8rem;line-height:1.1;white-space:nowrap;
+}
+.ranking-list{display:flex;flex-direction:column;gap:.55rem;margin-top:var(--space-4);}
+.ranking-row{display:flex;align-items:center;gap:.75rem;padding:.65rem .7rem;border-radius:var(--radius-lg);background:var(--color-surface-2);min-width:0;}
+.ranking-row>div{min-width:0;}
+.ranking-row strong,.ranking-row small{overflow-wrap:anywhere;word-break:break-word;}
+.ranking-row .bar{flex:0 0 100px;}
+.ranking-row .state-good,.ranking-row .state-mid,.ranking-row .state-risk{white-space:nowrap;line-height:1.1;}
+.games-table td{vertical-align:top;font-size:.84rem;line-height:1.3;}
+.games-table .fav-game strong,.games-table .fav-game span{overflow-wrap:normal;word-break:normal;}
+.sports-title{font-weight:700;white-space:normal;overflow-wrap:normal;word-break:normal;line-height:1.3;}
+.sports-meta{display:inline-flex;flex-wrap:wrap;gap:.35rem;color:var(--color-text-muted);line-height:1.35;}
+@media (max-width:1024px){
+  .decision-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-5);}
+  .decision-card{padding:.95rem;padding-bottom:1.1rem;}
+  .mini-table-row{
+    grid-template-columns:minmax(0,1.5fr) minmax(70px,.8fr) minmax(70px,.8fr) auto;
+    grid-template-areas:
+      "title metric1 metric2 status"
+      "action action action action";
+    row-gap:.5rem;
+  }
+  .mini-table-row>strong{grid-area:title;}
+  .mini-table-row>span:nth-of-type(1){grid-area:metric1;}
+  .mini-table-row>span:nth-of-type(2){grid-area:metric2;}
+  .mini-table-row>.state-good,.mini-table-row>.state-mid,.mini-table-row>.state-risk{grid-area:status;justify-self:start;}
+  .mini-table-row>.inline-action{grid-area:action;justify-self:start;}
+  .decision-footer{justify-content:flex-start;}
+  .ranking-row{flex-wrap:wrap;}
+  .ranking-row .bar{flex:1 1 140px;}
+  .ranking-row .state-good,.ranking-row .state-mid,.ranking-row .state-risk{margin-left:auto;}
+  .games-table td{padding:.6rem .5rem;font-size:.8rem;}
+}
+@media (max-width:860px){
+  .mini-table-row{grid-template-columns:1fr;grid-template-areas:none;}
+  .mini-table-row>*{grid-area:auto!important;justify-self:start!important;}
+  .decision-footer{flex-direction:column;align-items:stretch;}
+  .action-btn,.ghost-btn{width:100%;}
+  .ranking-row{flex-direction:column;align-items:flex-start;}
+  .ranking-row .bar{width:100%;}
+  .ranking-row .state-good,.ranking-row .state-mid,.ranking-row .state-risk{margin-left:0;}
+}
+
+@media (max-width:1024px){.decision-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.score-cluster,.kpi-grid,.signal-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){.main-wrap{padding:var(--space-4)}.hero-grid,.grid-two,.decision-grid{grid-template-columns:minmax(0,1fr)}.score-cluster,.kpi-grid,.signal-card-grid,.mini-metrics{grid-template-columns:minmax(0,1fr)}.channel-row,.mini-table-row{grid-template-columns:minmax(0,1fr)}.topbar{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="toc">
+    <div class="toc-title">Оглавление</div>
+    <nav class="toc-nav">
+      <a href="#summary-block">Player summary & Decision</a>
+      <a href="#value-risk">Value & risk</a>
+      <a href="#promo-block">Offer & promo</a>
+      <a href="#channels-block">Channel ranking</a>
+      <a href="#games-block">Favorite games scoring</a>
+      <a href="#sports-block">Sports analysis</a>
+      <a href="#timeline-block">Chat & timeline</a>
+    </nav>
+  </aside>
+  <main class="page">
+    <section id="summary-block" class="page-block">
+      <div class="main-wrap">
+  <div class="topbar">
+    <div class="title-wrap">
+      <h1>Player 360 / Player Card</h1>
+      <p>Единая страница по одному игроку: ценность, поведение, промо‑реакция, любимые игры, sportsbook‑сценарии, каналы коммуникации и ранние сигналы оттока.</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn">Запустить удержание</button>
+      <button class="btn-ghost">Передать VIP‑менеджеру</button>
+      <button class="btn-ghost">Открыть бонусную историю</button>
+    </div>
+  </div>
+
+  <section class="hero-grid">
+    <article class="card hero-card">
+      <div class="hero-head">
+        <div>
+          <div class="player-id">
+            <h2 style="margin:0">Игрок #847219 / Andrey K.</h2>
+            <span class="tag">VIP Gold</span>
+            <span class="tag status-live">Онлайн сейчас</span>
+            <span class="tag status-risk">Churn attention</span>
+          </div>
+          <p style="margin:.45rem 0 0;color:var(--color-text-muted)">Последняя сессия 11 минут назад • Telegram подтверждён • Email fatigue detected • Live chat case open</p>
+        </div>
+        <span class="tag">Обновлено 18:03</span>
+      </div>
+
+      <div class="score-cluster">
+        <div class="score-box">
+          <span class="label">Value score</span>
+          <strong>91</strong>
+          <em>Топ 2% базы</em>
+        </div>
+        <div class="score-box">
+          <span class="label">Player preference</span>
+          <div class="pref-switcher">
+            <div class="pref-segment active"><span>Казино</span><strong>68%</strong></div>
+            <div class="pref-segment"><span>Спорт</span><strong>32%</strong></div>
+          </div>
+          <em>Основная вертикаль — казино, спорт как secondary vertical</em>
+        </div>
+        <div class="score-box">
+          <span class="label">Promo affinity</span>
+          <strong>78</strong>
+          <em>Лучше game-specific бонусы, чем generic cashback</em>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi"><label>GGR 30d</label><strong>€18.4k</strong><small>+14% vs prev 30d</small></div>
+        <div class="kpi"><label>NGR 30d</label><strong>€13.1k</strong><small>После бонусов и PSP</small></div>
+        <div class="kpi"><label>Cashback YTD</label><strong>€2.9k</strong><small>11.8% от net loss</small></div>
+        <div class="kpi"><label>Любимая игра</label><strong>Gates 1000</strong><small>24% ставок за 30 дней</small></div>
+      </div>
+    </article>
+
+    <aside class="card recommendation-panel" id="offers">
+      <span class="section-label">Следующее лучшее действие</span>
+      <div class="recommendation-title">Сделать мягкий персональный офер в любимую слот‑линию, а не общий reload.</div>
+      <p class="recommendation-copy">Игрок лучше реагирует на короткие тематические кампании по любимым играм, чем на общий cashback. Push и Telegram дают более высокий отклик, чем email.</p>
+      <div class="promo-stack">
+        <div class="promo"><strong>Рекомендация №1 — Free spins в Gates 1000</strong><span>Триггер: 2 дня без депозита + падение bet amount на 28%.</span></div>
+        <div class="promo"><strong>Рекомендация №2 — VIP reload cap €750</strong><span>Запускать только после просмотра push или ответа в Telegram.</span></div>
+        <div class="promo"><strong>Рекомендация №3 — персональный чат‑аутрич</strong><span>Использовать после негативного CSAT в лайв‑чате или отказа от бонуса.</span></div>
+      </div>
+      <div class="mini-metrics">
+        <div class="mini-metric"><b>67%</b><span>accept rate по game-specific оферам</span></div>
+        <div class="mini-metric"><b>21%</b><span>accept rate по generic cashback</span></div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="decision-grid" id="decision">
+    <article class="card decision-card">
+      <div class="decision-top">
+        <div class="decision-title-wrap"><h3>Churn score</h3><p>Ключевой блок раннего предупреждения для чата, VIP‑менеджера и автоматики.</p></div>
+        <div class="decision-score"><strong>63</strong><span>High risk</span></div>
+      </div>
+      <div class="trendline"><span style="width:63%"></span></div>
+      <div class="meta-row">
+        <div class="meta-chip"><label>Окно прогноза</label><strong>7 дней</strong></div>
+        <div class="meta-chip"><label>Тренд</label><strong>+11 pts WoW</strong></div>
+        <div class="meta-chip"><label>Статус</label><strong>Требует действия</strong></div>
+      </div>
+      <div class="reason-list">
+        <div class="reason-item"><div><strong>Депозиты просели на 32%</strong><small>7 дней vs предыдущие 7 дней.</small></div><span class="reason-weight">driver 31%</span></div>
+        <div class="reason-item"><div><strong>2 дня без любимой игры</strong><small>Gates 1000 не запускалась с пятницы.</small></div><span class="reason-weight">driver 24%</span></div>
+        <div class="reason-item"><div><strong>3 промо подряд без реакции</strong><small>Последние generic offer не были активированы.</small></div><span class="reason-weight">driver 18%</span></div>
+      </div>
+      <div class="guardrail-list">
+        <div class="guardrail-item"><div><strong>Не отправлять email первым</strong><small>Низкий отклик и fatigue.</small></div></div>
+        <div class="guardrail-item"><div><strong>Не дублировать generic cashback</strong><small>Риск потратить бюджет без uplift.</small></div></div>
+      </div>
+      <div class="decision-footer"><button class="action-btn">Запустить удержание</button><button class="ghost-btn">Передать VIP‑менеджеру</button></div>
+    </article>
+
+    <article class="card decision-card">
+      <div class="decision-top">
+        <div class="decision-title-wrap"><h3>Promo affinity</h3><p>Показывает, какие механики реально двигают депозит и возврат игрока.</p></div>
+        <div class="decision-score"><strong>78</strong><span>High fit</span></div>
+      </div>
+      <div class="mini-table">
+        <div class="mini-table-row"><strong>Free spins</strong><span>accept 67%</span><span>uplift +22%</span><span class="state-good">Лучший</span><button class="inline-action">История</button></div>
+        <div class="mini-table-row"><strong>Tournament invite</strong><span>accept 54%</span><span>uplift +17%</span><span class="state-good">Сильный</span><button class="inline-action">История</button></div>
+        <div class="mini-table-row"><strong>Cashback</strong><span>accept 41%</span><span>uplift +11%</span><span class="state-mid">Средний</span><button class="inline-action">История</button></div>
+        <div class="mini-table-row"><strong>Generic reload</strong><span>accept 12%</span><span>uplift +4%</span><span class="state-risk">Слабый</span><button class="inline-action">История</button></div>
+      </div>
+      <div class="meta-row">
+        <div class="meta-chip"><label>Bonus fatigue</label><strong>Medium</strong></div>
+        <div class="meta-chip"><label>Dependency</label><strong>Low</strong></div>
+        <div class="meta-chip"><label>Abuse risk</label><strong>None</strong></div>
+      </div>
+      <div class="action-list">
+        <div class="action-item"><div><strong>Использовать только game-specific механики</strong><small>Лучше всего заходит в любимых слотах.</small></div></div>
+        <div class="action-item"><div><strong>Не повторять generic reload без триггера</strong><small>Игрок перестал на него реагировать.</small></div></div>
+      </div>
+      <div class="decision-footer"><button class="ghost-btn">Открыть историю бонусов</button></div>
+    </article>
+
+    <article class="card decision-card">
+      <div class="decision-top">
+        <div class="decision-title-wrap"><h3>Cashback engine</h3><p>Не просто сумма, а объяснимое решение с лимитами, guardrails и причиной расчёта.</p></div>
+        <div class="decision-score"><strong>€420</strong><span>Eligible</span></div>
+      </div>
+      <div class="meta-row">
+        <div class="meta-chip"><label>Suggested rate</label><strong>8%</strong></div>
+        <div class="meta-chip"><label>Base VIP rate</label><strong>5%</strong></div>
+        <div class="meta-chip"><label>Cap</label><strong>Applied</strong></div>
+      </div>
+      <div class="reason-list">
+        <div class="reason-item"><div><strong>Net loss 7d достаточен для cashback</strong><small>Игрок вошёл в eligible-коридор по убытку.</small></div><span class="reason-weight">+5%</span></div>
+        <div class="reason-item"><div><strong>Высокий churn добавил uplift</strong><small>Retention urgency увеличила рекомендованную ставку.</small></div><span class="reason-weight">+2%</span></div>
+        <div class="reason-item"><div><strong>Cashback affinity дал дополнительный uplift</strong><small>Но ниже, чем free spins fit.</small></div><span class="reason-weight">+1%</span></div>
+      </div>
+      <div style="margin-top:var(--space-4)"><div class="section-label" style="margin-bottom:.4rem">Использование бонусного бюджета за 30 дней</div><div class="budget-track"><span style="width:76%"></span></div><div style="margin-top:.45rem;color:var(--color-text-muted);font-size:.82rem">Остаток лимита: €180 • Responsible gaming: clear • Conflicting offers: none</div></div>
+      <div class="guardrail-list"><div class="guardrail-item"><div><strong>Лучше конвертировать в free spins, если нужен игровой офер</strong><small>У игрока выше response на game-specific промо.</small></div></div></div>
+      <div class="decision-footer"><button class="action-btn">Approve cashback</button><button class="ghost-btn">Convert to spins</button></div>
+    </article>
+
+    <article class="card decision-card">
+      <div class="decision-top">
+        <div class="decision-title-wrap"><h3>Channel ranking</h3><p>Ранжирование каналов именно для текущего офера и текущего момента.</p></div>
+        <div class="decision-score"><strong>82</strong><span>Telegram</span></div>
+      </div>
+      <div class="meta-row">
+        <div class="meta-chip"><label>Best window</label><strong>19:00–21:00</strong></div>
+        <div class="meta-chip"><label>Backup</label><strong>Push</strong></div>
+        <div class="meta-chip"><label>Suppressed</label><strong>Email</strong></div>
+      </div>
+      <div class="ranking-list">
+        <div class="ranking-row"><div class="channel-name"><span class="channel-title">Telegram</span><span class="channel-meta">Reply 18.2% • Deposit conv 9.2%</span></div><div class="bar" style="min-width:110px"><span style="width:82%"></span></div><span class="state-good">Best</span></div>
+        <div class="ranking-row"><div class="channel-name"><span class="channel-title">Мессенджер</span><span class="channel-meta">CTR 22.1% • Только когда пользователь онлайн • Deposit conv 8.3%</span></div><div class="bar" style="min-width:110px"><span style="width:79%"></span></div><span class="state-good">Strong</span></div>
+        <div class="ranking-row"><div class="channel-name"><span class="channel-title">Push</span><span class="channel-meta">CTR 14.4% • Deposit conv 7.1%</span></div><div class="bar" style="min-width:110px"><span style="width:74%"></span></div><span class="state-good">Strong</span></div>
+        <div class="ranking-row"><div class="channel-name"><span class="channel-title">Live chat</span><span class="channel-meta">Работает при открытой сессии или support case</span></div><div class="bar" style="min-width:110px"><span style="width:58%"></span></div><span class="state-mid">Context</span></div>
+        <div class="ranking-row"><div class="channel-name"><span class="channel-title">Email</span><span class="channel-meta">Fatigue detected • weak conversion</span></div><div class="bar" style="min-width:110px"><span style="width:31%"></span></div><span class="state-risk">Avoid</span></div>
+      </div>
+      <div class="decision-footer"><button class="ghost-btn">Отправить в лучший канал</button></div>
+    </article>
+
+    <article class="card decision-card">
+      <div class="decision-top">
+        <div class="decision-title-wrap"><h3>Favorite games scoring</h3><p>Игровые предпочтения в пригодном для рекомендаций и бонусного движка виде.</p></div>
+        <div class="decision-score"><strong>94</strong><span>Top game</span></div>
+      </div>
+      <div class="mini-table">
+        <div class="mini-table-row"><strong>Gates 1000</strong><span class="metric metric-share">share 24%</span><span class="metric metric-bet">avg bet €84</span><span class="state-good">fit max</span><button class="inline-action">Выдать<br>фриспины</button></div>
+        <div class="mini-table-row"><strong>Sweet Bonanza</strong><span class="metric metric-share">share 18%</span><span class="metric metric-bet">avg bet €62</span><span class="state-good">fit high</span><button class="inline-action">Выдать<br>фриспины</button></div>
+        <div class="mini-table-row"><strong>Lightning Roulette</strong><span class="metric metric-share">share 13%</span><span class="metric metric-bet">avg bet €110</span><span class="state-mid">fit medium</span><button class="inline-action">Выдать<br>фриспины</button></div>
+        <div class="mini-table-row"><strong>Book of Dead</strong><span class="metric metric-share">share 9%</span><span class="metric metric-bet">avg bet €48</span><span class="state-mid">fit selective</span><button class="inline-action">Выдать<br>фриспины</button></div>
+        <div class="mini-table-row"><strong>Big Bass Bonanza</strong><span class="metric metric-share">share 7%</span><span class="metric metric-bet">avg bet €56</span><span class="state-mid">fit test</span><button class="inline-action">Выдать<br>фриспины</button></div>
+      </div>
+      <div class="meta-row">
+        <div class="meta-chip"><label>Player preference</label><strong>Казино</strong></div>
+        <div class="meta-chip"><label>Casino verticals</label><strong>Слоты • Live • Instant</strong></div>
+        <div class="meta-chip"><label>Provider</label><strong>Pragmatic Play</strong></div>
+      </div>
+      <div class="action-list">
+        <div class="action-item"><div><strong>Лучший контент офера — free spins в Gates 1000</strong><small>Самый высокий score и лучший historical bonus fit.</small></div></div>
+        <div class="action-item"><div><strong>Второй вариант — event/tournament around slots</strong><small>Лучше, чем абстрактный VIP reload.</small></div></div>
+      </div>
+      <div class="decision-footer"><button class="ghost-btn">Открыть game affinity</button></div>
+    </article>
+
+    <article class="card decision-card">
+      <div class="decision-top">
+        <div class="decision-title-wrap"><h3>Sports analysis</h3><p>Спортивные предпочтения игрока в формате, пригодном для оферов и CRM‑действий.</p></div>
+        <div class="decision-score"><strong>81</strong><span>Sports fit</span></div>
+      </div>
+      <div class="mini-table">
+        <div class="mini-table-row"><span class="sports-title">Футбол live</span><span>share 38%</span><span>avg bet €96</span><span class="state-good">fit max</span><button class="inline-action">Выдать<br>boost</button></div>
+        <div class="mini-table-row"><span class="sports-title">Теннис live</span><span>share 21%</span><span>avg bet €74</span><span class="state-good">fit high</span><button class="inline-action">Выдать<br>boost</button></div>
+        <div class="mini-table-row"><span class="sports-title">Баскетбол pre-match</span><span>share 14%</span><span>avg bet €68</span><span class="state-mid">fit medium</span><button class="inline-action">Выдать<br>boost</button></div>
+        <div class="mini-table-row"><span class="sports-title">Экспрессы</span><span>share 11%</span><span>avg bet €58</span><span class="state-mid">fit selective</span><button class="inline-action">Выдать<br>boost</button></div>
+        <div class="mini-table-row"><span class="sports-title">Киберспорт</span><span>share 7%</span><span>avg bet €40</span><span class="state-risk">fit low</span><button class="inline-action">Выдать<br>boost</button></div>
+      </div>
+      <div class="meta-row">
+        <div class="meta-chip"><label>Player preference</label><strong>Спорт — secondary</strong></div>
+        <div class="meta-chip"><label>Favorite sport</label><strong>Футбол</strong></div>
+        <div class="meta-chip"><label>Favorite market</label><strong>Live total</strong></div>
+      </div>
+      <div class="action-list">
+        <div class="action-item"><div><strong>Лучший офер — live football boost перед матчем</strong><small>Лучше работает, чем общий sportsbook reload.</small></div></div>
+        <div class="action-item"><div><strong>Использовать push и мессенджер перед kickoff</strong><small>Особенно когда пользователь онлайн.</small></div></div>
+      </div>
+      <div class="decision-footer"><button class="ghost-btn">Открыть sports affinity</button></div>
+    </article>
+  </section>
+
+  <section class="grid-two" id="value">
+    <article class="card">
+      <div class="panel-head"><div><h2>Динамика ценности и риска</h2><p>Одна основная временная шкала, чтобы видеть доход, активность, бонусную нагрузку и сигнал вероятного оттока.</p></div><div class="tag">Последние 12 недель</div></div>
+      <div class="panel-body"><div class="chart-wrap"><canvas id="valueChart" aria-label="График GGR, активности и риска"></canvas></div></div>
+    </article>
+    <div class="stack">
+      <article class="card">
+        <div class="panel-head"><div><h2>Каналы коммуникации</h2><p>Какие каналы реально двигают депозит и возврат.</p></div></div>
+        <div class="panel-body channel-grid">
+          <div class="channel-row"><div class="channel-name"><strong>Telegram</strong></div><div class="bar"><span style="width:82%"></span></div><span>CTR 18.2%</span><span class="state-good">Лучший</span></div>
+          <div class="channel-row"><div class="channel-name"><strong>Мессенджер</strong><span class="status-corner">Онлайн</span></div><div class="bar"><span style="width:79%"></span></div><span>CTR 22.1% • Только онлайн</span><span class="state-good">Сильный</span></div>
+          <div class="channel-row"><div class="channel-name"><strong>Push</strong></div><div class="bar"><span style="width:74%"></span></div><span>CTR 14.4%</span><span class="state-good">Сильный</span></div>
+          <div class="channel-row"><div class="channel-name"><strong>Live chat</strong><span class="status-corner">Чат открыт</span></div><div class="bar"><span style="width:58%"></span></div><span>Reply 61%</span><span class="state-mid">Ситуативно</span></div>
+          <div class="channel-row"><div class="channel-name"><strong>Email</strong></div><div class="bar"><span style="width:31%"></span></div><span>CTR 4.6%</span><span class="state-risk">Слабый</span></div>
+        </div>
+      </article>
+      <article class="card" id="risk">
+        <div class="panel-head"><div><h2>Ключевые сигналы оттока</h2><p>Сигналы, на которые VIP‑менеджер должен реагировать в течение суток.</p></div></div>
+        <div class="panel-body signal-card-grid">
+          <div class="signal-card"><span>Падение депозитов</span><strong>-32%</strong><p>7 дней vs предыдущие 7 дней.</p></div>
+          <div class="signal-card"><span>Снижение bet amount</span><strong>-28%</strong><p>При сохранении частоты логина.</p></div>
+          <div class="signal-card"><span>Тишина после промо</span><strong>3</strong><p>Последние 3 офера без активации.</p></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="grid-two" id="promo">
+    <article class="card">
+      <div class="panel-head"><div><h2>Промо и бонусная реакция</h2><p>Что игрок принимает, что игнорирует и где бонусная экономика начинает портить маржу.</p></div><div class="tag">60 дней</div></div>
+      <div class="panel-body">
+        <table class="games-table">
+          <colgroup>
+            <col class="col-game">
+            <col class="col-share">
+            <col class="col-bet">
+            <col class="col-fit">
+            <col class="col-action">
+          </colgroup>
+          <thead><tr><th>Механика</th><th>Использование</th><th>Uplift в депозит</th><th>ROI</th><th>Статус</th></tr></thead>
+          <tbody>
+            <tr><td><div class="fav-game"><strong>Free spins на любимый слот</strong><span>Game-specific</span></div></td><td>7 из 9</td><td>+22%</td><td>1.8x</td><td><span class="state-good">Масштабировать</span></td></tr>
+            <tr><td><div class="fav-game"><strong>Reload bonus</strong><span>Общий VIP офер</span></div></td><td>2 из 6</td><td>+4%</td><td>0.9x</td><td><span class="state-risk">Сократить</span></td></tr>
+            <tr><td><div class="fav-game"><strong>Cashback weekend</strong><span>Loss-based</span></div></td><td>5 из 8</td><td>+11%</td><td>1.2x</td><td><span class="state-mid">Дозировать</span></td></tr>
+            <tr><td><div class="fav-game"><strong>Tournament invite</strong><span>Event-based</span></div></td><td>3 из 4</td><td>+17%</td><td>1.6x</td><td><span class="state-good">Повторить</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+    <article class="card">
+      <div class="panel-head"><div><h2>Любимые игры и поведение</h2><p>Бонусы должны маппиться на фактические игровые предпочтения, а не на общий VIP‑статус.</p></div></div>
+      <div class="panel-body">
+        <table class="games-table">
+          <colgroup>
+            <col class="col-game">
+            <col class="col-share">
+            <col class="col-bet">
+            <col class="col-fit">
+            <col class="col-action">
+          </colgroup>
+          <thead><tr><th>Игра</th><th>Доля ставок</th><th>Средний bet</th><th>Бонусный fit</th></tr></thead>
+          <tbody>
+            <tr><td><div class="fav-game"><strong>Gates 1000</strong><span>Высокая волатильность</span></div></td><td>24%</td><td>€84</td><td><span class="state-good">Максимальный</span></td></tr>
+            <tr><td><div class="fav-game"><strong>Sweet Bonanza</strong><span>Возврат после проигрыша</span></div></td><td>18%</td><td>€62</td><td><span class="state-good">Высокий</span></td></tr>
+            <tr><td><div class="fav-game"><strong>Lightning Roulette</strong><span>Поздние вечерние сессии</span></div></td><td>13%</td><td>€110</td><td><span class="state-mid">Точечный</span></td></tr>
+            <tr><td><div class="fav-game"><strong>Book of Dead</strong><span>Редкие long sessions</span></div></td><td>7%</td><td>€48</td><td><span class="state-risk">Низкий</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section class="grid-two" id="chat">
+    <article class="card">
+      <div class="panel-head"><div><h2>Чаты, поддержка и отношение к сервису</h2><p>Негатив в чате часто приходит раньше просадки по депозитам, поэтому его нужно держать рядом с денежными метриками.</p></div></div>
+      <div class="panel-body">
+        <table class="signals-table">
+          <thead><tr><th>Метрика</th><th>Значение</th><th>Комментарий</th></tr></thead>
+          <tbody>
+            <tr><td>Чаты за 30 дней</td><td>11</td><td>Рост из-за payout и бонусных вопросов.</td></tr>
+            <tr><td>CSAT после чата</td><td>4.2 / 5</td><td>Последний кейс дал оценку 2/5.</td></tr>
+            <tr><td>Повторные обращения</td><td>27%</td><td>Есть незакрытые кейсы по лимитам вывода.</td></tr>
+            <tr><td>Среднее время ответа</td><td>42 сек</td><td>Норма для VIP, но чувствителен к задержкам.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+    <article class="card" id="activity">
+      <div class="panel-head"><div><h2>Лента действий и триггеров</h2><p>Короткая operational timeline для VIP‑менеджера.</p></div></div>
+      <div class="panel-body timeline">
+        <div class="timeline-item"><div style="display:flex;gap:var(--space-3)"><span class="dot"></span><div><strong>Push открыт, бонус не активирован</strong><p>Игрок прочитал предложение, но не начал сессию.</p></div></div><time>Сегодня</time></div>
+        <div class="timeline-item"><div style="display:flex;gap:var(--space-3)"><span class="dot" style="background:var(--color-warning)"></span><div><strong>CSAT 2/5 после чата о выплате</strong><p>Нужен ручной follow-up от VIP‑менеджера.</p></div></div><time>Вчера</time></div>
+        <div class="timeline-item"><div style="display:flex;gap:var(--space-3)"><span class="dot" style="background:var(--color-success)"></span><div><strong>Персональный турнир принят</strong><p>После офера сделал депозит €2,000.</p></div></div><time>3 дня назад</time></div>
+        <div class="timeline-item"><div style="display:flex;gap:var(--space-3)"><span class="dot" style="background:var(--color-error)"></span><div><strong>Третий generic cashback проигнорирован</strong><p>Снижайте частоту повторов этого сценария.</p></div></div><time>5 дней назад</time></div>
+      </div>
+    </article>
+  </section>
+
+  <div class="footer-note">Макет показывает страницу одного игрока без списков и фильтров; все данные демонстрационные.</div>
+</div>
+<script>
+const ctx = document.getElementById('valueChart');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'],
+    datasets: [
+      {label:'GGR', data:[10,12,13,15,16,18,20,21,19,17,16,14], borderColor:'#01696f', backgroundColor:'rgba(1,105,111,.08)', tension:.35, fill:true, yAxisID:'y'},
+      {label:'Sessions', data:[42,46,51,55,58,62,65,68,61,57,53,49], borderColor:'#d19900', backgroundColor:'transparent', tension:.35, yAxisID:'y1'},
+      {label:'Churn risk', data:[22,24,27,30,28,32,35,39,44,51,58,63], borderColor:'#a12c7b', backgroundColor:'transparent', tension:.35, yAxisID:'y2'}
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom'}},
+    scales:{
+      y:{position:'left', grid:{color:'rgba(40,37,29,.08)'}, ticks:{color:'#7a7974'}},
+      y1:{position:'right', grid:{display:false}, ticks:{color:'#7a7974'}},
+      y2:{display:false, min:0, max:100}
+    }
+  }
+});
+</script>
+</body>
+</html>
