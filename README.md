@@ -21,3 +21,8 @@ python3 -m http.server 8000
 ## Деплой
 
 Проект развёрнут на Vercel как статический сайт. Обновление — новый пуш в `main`, Vercel автоматически пересобирает.
+
+## Ссылки
+
+- Production (Vercel): https://player360-ochre.vercel.app/
+- GitHub: https://github.com/mikhail671/player360
